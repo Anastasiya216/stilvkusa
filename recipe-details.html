@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Рецепт — СтильВкуса</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header class="header">
+  <div class="container">
+    <div class="header-wrapper">
+      <div class="logo">
+        <a id="logoHomeLink">
+          <img class="logo-img" src="images/лого.png" alt="Лого">
+          <span class="logo-text">СтильВкуса</span>
+        </a>
+      </div>
+      <div class="nav-links">
+        <a data-page="home" class="active">Главная</a>
+        <a data-page="catalog">Каталог</a>
+        <a data-page="travel">Путешествуй и пробуй</a>
+        <a data-page="about">О нас</a>
+        <a data-page="planner">План на неделю</a>
+        <div class="theme-switch-wrapper">
+            <label class="theme-switch">
+            <input type="checkbox" id="themeToggle">
+            <span class="slider"></span>
+            </label>
+        </div>
+      </div>
+      <div class="search-box">
+        <input type="text" id="searchInput" placeholder="Поиск рецептов...">
+        <button id="searchButton"><i class="fas fa-search"></i></button>
+      </div>
+      <button class="burger-menu" id="burgerBtn"><span></span><span></span><span></span></button>
+    </div>
+    <div class="mobile-nav" id="mobileMenu">
+      <a data-page="home">Главная</a>
+      <a data-page="catalog">Каталог</a>
+      <a data-page="travel">Путешествуй и пробуй</a>
+      <a data-page="about">О нас</a>
+      <a data-page="planner">План на неделю</a>
+    </div>
+  </div>
+</header>
+<div class="content-wrapper">
+<div class="white-strip">
+<main>
+<div id="recipeDetailContent" class="recipe-detail-page">
+  <div class="loading">Загрузка рецепта...</div>
+</div>
+</main>
+</div>
+</div>
+
+<footer class="footer">
+<div class="container">
+<div class="footer-container">
+<div class="footer-col"><h4>Навигация</h4><ul><li><a href="index.html">Главная</a></li><li><a href="index.html#catalogPage">Каталог</a></li></ul></div>
+<div class="footer-col"><h4>Контакты</h4><ul><li>StyleVkusa@mail.ru</li><li>+7 (494) 255-55-55</li></ul></div>
+</div>
+<div class="footer-bottom">© 2026 СтильВкуса — Гармония вкуса и стиля.</div>
+</div>
+</footer>
+
+<script src="js/main.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+<!-- Скрипт для отображения детального рецепта -->
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const urlParams = new URLSearchParams(window.location.search);
+  const recipeId = urlParams.get('id');
+  const container = document.getElementById('recipeDetailContent');
+
+  if (!recipeId) {
+    showRecipeNotFound(container);
+    return;
+  }
+
+  container.innerHTML = '<div class="loading">Загрузка рецепта...</div>';
+
+  // Функция для получения полного рецепта по имени из fullRecipes
+  function getFullRecipeByName(recipeName) {
+    // Проверяем во всех fullRecipes объектах
+    if (typeof fullRecipes !== 'undefined' && fullRecipes[recipeName]) {
+      return { ...fullRecipes[recipeName], type: 'salad' };
+    }
+    if (typeof soupsFullRecipes !== 'undefined' && soupsFullRecipes[recipeName]) {
+      return { ...soupsFullRecipes[recipeName], type: 'soup' };
+    }
+    if (typeof mainsFullRecipes !== 'undefined' && mainsFullRecipes[recipeName]) {
+      return { ...mainsFullRecipes[recipeName], type: 'main' };
+    }
+    if (typeof dessertsFullRecipes !== 'undefined' && dessertsFullRecipes[recipeName]) {
+      return { ...dessertsFullRecipes[recipeName], type: 'dessert' };
+    }
+    if (typeof drinksFullRecipes !== 'undefined' && drinksFullRecipes[recipeName]) {
+      return { ...drinksFullRecipes[recipeName], type: 'drink' };
+    }
+    if (typeof bakeryFullRecipes !== 'undefined' && bakeryFullRecipes[recipeName]) {
+      return { ...bakeryFullRecipes[recipeName], type: 'bakery' };
+    }
+    if (typeof breakfastFullRecipes !== 'undefined' && breakfastFullRecipes[recipeName]) {
+      return { ...breakfastFullRecipes[recipeName], type: 'breakfast' };
+    }
+    if (typeof saucesFullRecipes !== 'undefined' && saucesFullRecipes[recipeName]) {
+      return { ...saucesFullRecipes[recipeName], type: 'sauce' };
+    }
+    return null;
+  }
+
+  // Функция для получения рецепта из всех списков по ID
+  function getRecipeById(id) {
+    // Парсим ID: формат "категория-индекс"
+    const parts = id.split('-');
+    if (parts.length < 2) return null;
+    
+    const category = parts[0];
+    const index = parseInt(parts[1]);
+    
+    // Определяем, из какого списка брать данные
+    if (category === 'salad') {
+      return typeof saladsRecipesList !== 'undefined' && saladsRecipesList[index] 
+        ? saladsRecipesList[index] : null;
+    }
+    if (category === 'soup') {
+      return typeof soupsList !== 'undefined' && soupsList[index] 
+        ? soupsList[index] : null;
+    }
+    if (category === 'main') {
+      return typeof mainsList !== 'undefined' && mainsList[index] 
+        ? mainsList[index] : null;
+    }
+    if (category === 'dessert') {
+      return typeof dessertsList !== 'undefined' && dessertsList[index] 
+        ? dessertsList[index] : null;
+    }
+    if (category === 'drink') {
+      return typeof drinksList !== 'undefined' && drinksList[index] 
+        ? drinksList[index] : null;
+    }
+    if (category === 'bakery') {
+      return typeof bakeryList !== 'undefined' && bakeryList[index] 
+        ? bakeryList[index] : null;
+    }
+    if (category === 'breakfast') {
+      return typeof breakfastList !== 'undefined' && breakfastList[index] 
+        ? breakfastList[index] : null;
+    }
+    if (category === 'sauce') {
+      return typeof saucesList !== 'undefined' && saucesList[index] 
+        ? saucesList[index] : null;
+    }
+    
+    return null;
+  }
+
+  // Получаем рецепт по ID
+  const basicRecipe = getRecipeById(recipeId);
+  
+  if (!basicRecipe) {
+    showRecipeNotFound(container);
+    return;
+  }
+
+  // Получаем полные данные рецепта (с ингредиентами и шагами)
+  const fullRecipe = getFullRecipeByName(basicRecipe.name);
+
+  if (!fullRecipe) {
+    // Если не нашли в fullRecipes, показываем то, что есть (без ингредиентов)
+    displayBasicRecipe(basicRecipe, container);
+    return;
+  }
+
+  // Отображаем полный рецепт
+  displayFullRecipe(basicRecipe, fullRecipe, container);
+});
+
+function displayFullRecipe(basicRecipe, fullRecipe, container) {
+  container.innerHTML = `
+    <button class="back-to-catalog" onclick="window.location.href='index.html'">
+      <i class="fas fa-arrow-left"></i> Назад к каталогу
+    </button>
+    <div class="recipe-detail-card">
+      <img class="detail-img" src="${basicRecipe.img}" alt="${basicRecipe.name}" onerror="this.src='https://via.placeholder.com/600x400?text=${encodeURIComponent(basicRecipe.name)}'">
+      <h1><i class="fas fa-utensil-spoon"></i> ${escapeHtml(basicRecipe.name)}</h1>
+      <div style="display:flex; gap:20px; margin-bottom:20px; flex-wrap:wrap;">
+        <span>⚖️ Вес: ${fullRecipe.weight || basicRecipe.weight || '—'}</span>
+        <span>🔥 Калорийность: ${fullRecipe.calories || basicRecipe.calories || '—'}</span>
+      </div>
+      
+      <h2>Ингредиенты:</h2>
+      <ul style="margin-bottom:30px;">
+        ${fullRecipe.ingredients ? fullRecipe.ingredients.map(i => `<li>${escapeHtml(i)}</li>`).join('') : '<li>Ингредиенты не указаны</li>'}
+      </ul>
+      
+      <h2>Приготовление:</h2>
+      <ol style="margin-bottom:30px;">
+        ${fullRecipe.steps ? fullRecipe.steps.map(s => `<li>${escapeHtml(s)}</li>`).join('') : '<li>Шаги приготовления не указаны</li>'}
+      </ol>
+      
+      <p style="margin-top:30px; font-style:italic; text-align:center;">Приятного аппетита от СтильВкуса! 🍽️</p>
+      
+      <div style="margin-top: 40px; text-align: center;">
+        <button onclick="window.location.href='index.html'" style="background: #6a1b2a; color: white; border: none; padding: 10px 25px; border-radius: 30px; cursor: pointer;">
+          🏠 На главную
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+function displayBasicRecipe(recipe, container) {
+  container.innerHTML = `
+    <button class="back-to-catalog" onclick="window.location.href='index.html'">
+      <i class="fas fa-arrow-left"></i> Назад к каталогу
+    </button>
+    <div class="recipe-detail-card">
+      <img class="detail-img" src="${recipe.img}" alt="${recipe.name}" onerror="this.src='https://via.placeholder.com/600x400?text=${encodeURIComponent(recipe.name)}'">
+      <h1><i class="fas fa-utensil-spoon"></i> ${escapeHtml(recipe.name)}</h1>
+      <div style="display:flex; gap:20px; margin-bottom:20px;">
+        <span>⚖️ Вес: ${recipe.weight || '—'}</span>
+        <span>🔥 Калорийность: ${recipe.calories || '—'}</span>
+      </div>
+      
+      <p style="color: #888; text-align: center; padding: 40px;">
+        ⚠️ Полная информация о рецепте временно недоступна.
+      </p>
+      
+      <div style="margin-top: 40px; text-align: center;">
+        <button onclick="window.location.href='index.html'" style="background: #6a1b2a; color: white; border: none; padding: 10px 25px; border-radius: 30px; cursor: pointer;">
+          🏠 На главную
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+function showRecipeNotFound(container) {
+  container.innerHTML = `
+    <button class="back-to-catalog" onclick="window.location.href='index.html'">
+      <i class="fas fa-arrow-left"></i> Назад к каталогу
+    </button>
+    <div class="recipe-detail-card" style="text-align: center; padding: 60px;">
+      <div style="font-size: 64px; margin-bottom: 20px;">🍽️</div>
+      <h2>Рецепт не найден</h2>
+      <p>К сожалению, запрошенный рецепт не существует или был удалён.</p>
+      <button onclick="window.location.href='index.html'" style="background: #6a1b2a; color: white; border: none; padding: 12px 30px; border-radius: 30px; cursor: pointer; margin-top: 20px;">
+        Вернуться на главную
+      </button>
+    </div>
+  `;
+}
+
+function escapeHtml(str) {
+  if (!str) return '';
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+</script>
+// ==================== ИСПРАВЛЕНИЕ ПОИСКА (РАБОТАЕТ БЕЗ recipe-details.html) ====================
+<script>
+// Обновляем функцию showRecipeDetail (не уходим на другую страницу)
+if (typeof window.showRecipeDetail !== 'function') {
+    window.showRecipeDetail = function(recipe) {
+        // Закрываем результаты поиска
+        const resultsContainer = document.getElementById('searchResults');
+        if (resultsContainer) resultsContainer.style.display = 'none';
+        
+        // Очищаем поле поиска
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput) searchInput.value = '';
+        
+        // Открываем рецепт через существующую функцию
+        switch(recipe.category) {
+            case 'salads':
+                if (typeof showSaladDetail === 'function') showSaladDetail(recipe.name);
+                break;
+            case 'soups':
+                if (typeof showSoupDetail === 'function') showSoupDetail(recipe.name);
+                break;
+            case 'mains':
+                if (typeof showMainDetail === 'function') showMainDetail(recipe.name);
+                break;
+            case 'desserts':
+                if (typeof showDessertDetail === 'function') showDessertDetail(recipe.name);
+                break;
+            case 'drinks':
+                if (typeof showDrinkDetail === 'function') showDrinkDetail(recipe.name);
+                break;
+            case 'bakery':
+            case 'bakerys':
+                if (typeof showBakeryDetail === 'function') showBakeryDetail(recipe.name);
+                break;
+            case 'breakfast':
+            case 'breakfasts':
+                if (typeof showBreakfastDetail === 'function') showBreakfastDetail(recipe.name);
+                break;
+            case 'sauces':
+                if (typeof showSauceDetail === 'function') showSauceDetail(recipe.name);
+                break;
+            default:
+                if (typeof showPage === 'function') showPage('catalog');
+        }
+    };
+}
+
+// Обновляем функцию performSearch
+if (typeof window.performSearch !== 'function') {
+    window.performSearch = function(query) {
+        const resultsContainer = document.getElementById('searchResults');
+        if (!resultsContainer) return;
+        resultsContainer.innerHTML = '';
+
+        if (!query.trim()) {
+            resultsContainer.style.display = 'none';
+            return;
+        }
+
+        // Собираем все рецепты
+        const allRecipesData = [];
+        
+        if (typeof saladsRecipesList !== 'undefined') {
+            saladsRecipesList.forEach((recipe, idx) => {
+                allRecipesData.push({ ...recipe, category: 'salads', id: `salad-${idx}` });
+            });
+        }
+        if (typeof soupsList !== 'undefined') {
+            soupsList.forEach((recipe, idx) => {
+                allRecipesData.push({ ...recipe, category: 'soups', id: `soup-${idx}` });
+            });
+        }
+        if (typeof mainsList !== 'undefined') {
+            mainsList.forEach((recipe, idx) => {
+                allRecipesData.push({ ...recipe, category: 'mains', id: `main-${idx}` });
+            });
+        }
+        if (typeof dessertsList !== 'undefined') {
+            dessertsList.forEach((recipe, idx) => {
+                allRecipesData.push({ ...recipe, category: 'desserts', id: `dessert-${idx}` });
+            });
+        }
+        if (typeof drinksList !== 'undefined') {
+            drinksList.forEach((recipe, idx) => {
+                allRecipesData.push({ ...recipe, category: 'drinks', id: `drink-${idx}` });
+            });
+        }
+        if (typeof bakeryList !== 'undefined') {
+            bakeryList.forEach((recipe, idx) => {
+                allRecipesData.push({ ...recipe, category: 'bakery', id: `bakery-${idx}` });
+            });
+        }
+        if (typeof breakfastList !== 'undefined') {
+            breakfastList.forEach((recipe, idx) => {
+                allRecipesData.push({ ...recipe, category: 'breakfast', id: `breakfast-${idx}` });
+            });
+        }
+        if (typeof saucesList !== 'undefined') {
+            saucesList.forEach((recipe, idx) => {
+                allRecipesData.push({ ...recipe, category: 'sauces', id: `sauce-${idx}` });
+            });
+        }
+
+        const lowerQuery = query.toLowerCase();
+        const matches = allRecipesData.filter(recipe =>
+            recipe.name.toLowerCase().includes(lowerQuery) ||
+            (recipe.desc && recipe.desc.toLowerCase().includes(lowerQuery))
+        );
+
+        if (matches.length === 0) {
+            resultsContainer.innerHTML = '<div style="padding: 15px; text-align: center; color: #888;">🔍 По запросу ничего не найдено.</div>';
+            resultsContainer.style.display = 'block';
+            return;
+        }
+
+        matches.forEach(recipe => {
+            const recipeElement = document.createElement('div');
+            recipeElement.className = 'search-result-item';
+            recipeElement.style.cssText = 'display: flex; gap: 15px; padding: 12px; border-bottom: 1px solid #eee; cursor: pointer; align-items: center; transition: background 0.2s;';
+            recipeElement.onmouseenter = () => recipeElement.style.background = '#f5f5f5';
+            recipeElement.onmouseleave = () => recipeElement.style.background = 'transparent';
+            
+            recipeElement.innerHTML = `
+                <img src="${recipe.img}" alt="${recipe.name}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 10px;" onerror="this.src='https://via.placeholder.com/50'">
+                <div style="flex: 1;">
+                    <div style="font-weight: bold;">${escapeHtml(recipe.name)}</div>
+                    <div style="font-size: 11px; color: #888; margin-top: 3px;">📂 ${getCategoryName(recipe.category)}</div>
+                </div>
+                <i class="fas fa-chevron-right" style="color: #ccc;"></i>
+            `;
+            
+            recipeElement.addEventListener('click', (e) => {
+                e.stopPropagation();
+                window.showRecipeDetail(recipe);
+            });
+            resultsContainer.appendChild(recipeElement);
+        });
+
+        resultsContainer.style.display = 'block';
+    };
+}
+
+// Вспомогательная функция для названия категории
+function getCategoryName(category) {
+    const names = {
+        'salads': 'Салаты',
+        'soups': 'Супы',
+        'mains': 'Горячие блюда',
+        'desserts': 'Десерты',
+        'drinks': 'Напитки',
+        'bakery': 'Выпечка',
+        'breakfast': 'Завтраки',
+        'sauces': 'Соусы'
+    };
+    return names[category] || 'Рецепты';
+}
+
+// Переопределяем обработчики поиска
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchInput');
+    const searchButton = document.getElementById('searchButton');
+    
+    // Удаляем старые обработчики, если есть
+    const newSearchInput = searchInput?.cloneNode(true);
+    const newSearchButton = searchButton?.cloneNode(true);
+    if (searchInput && newSearchInput) {
+        searchInput.parentNode.replaceChild(newSearchInput, searchInput);
+    }
+    if (searchButton && newSearchButton) {
+        searchButton.parentNode.replaceChild(newSearchButton, searchButton);
+    }
+    
+    const finalSearchInput = document.getElementById('searchInput');
+    const finalSearchButton = document.getElementById('searchButton');
+    
+    if (finalSearchInput) {
+        finalSearchInput.addEventListener('input', (e) => {
+            if (typeof window.performSearch === 'function') {
+                window.performSearch(e.target.value);
+            }
+        });
+    }
+    
+    if (finalSearchButton) {
+        finalSearchButton.addEventListener('click', () => {
+            if (finalSearchInput && typeof window.performSearch === 'function') {
+                window.performSearch(finalSearchInput.value);
+            }
+        });
+    }
+    
+    // Закрытие результатов при клике вне поля поиска
+    document.addEventListener('click', (e) => {
+        const resultsContainer = document.getElementById('searchResults');
+        if (resultsContainer && !e.target.closest('.search-box')) {
+            resultsContainer.style.display = 'none';
+        }
+    });
+    
+    console.log('🔍 Поиск настроен (без отдельной страницы)');
+});
+</script>
+</body>
+</html>
