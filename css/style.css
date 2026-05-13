@@ -4772,3 +4772,114 @@ body.dark-theme .day-recipes::-webkit-scrollbar-thumb {
     background: #ff9999;
     border-radius: 3px;
 }
+
+/* Стили для AI Шеф-повара */
+.ai-chef {
+  padding: 20px;
+}
+
+.chat-messages {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.message {
+  padding: 12px 16px;
+  border-radius: 8px;
+  max-width: 100%;
+  word-break: break-word;
+}
+
+.message-user {
+  background: #f0f0f0;
+  align-self: flex-start;
+}
+
+.message-bot {
+  background: #6a1b2a;
+  color: white;
+  align-self: flex-end;
+}
+
+/* Адаптация для мобильных устройств */
+@media screen and (max-width: 768px) {
+  .chat-messages {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .message {
+    max-width: 100%;
+    margin: 0 16px;
+    padding: 12px;
+    border-radius: 8px;
+    word-break: break-word;
+  }
+  
+  .message-bot,
+  .message-user {
+    width: 100%;
+    max-width: calc(100% - 32px); /* Отступы по 16px с каждой стороны */
+  }
+  
+  .message-bot {
+    margin-left: auto;
+  }
+  
+  .message-user {
+    margin-right: auto;
+  }
+}
+
+/* Дополнительные отступы для маленьких экранов */
+@media screen and (max-width: 480px) {
+  .message {
+    padding: 10px 12px;
+  }
+  
+  .chat-messages {
+    padding: 16px;
+  }
+}
+
+/* Базовый стиль для всех сообщений AI */
+  .ai-response, .chat-message--ai {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100%;
+    -webkit-line-break: normal;
+    line-break: normal;
+  }
+
+  @media (max-width: 768px) {
+    .ai-response, .chat-message--ai {
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      overflow: visible;
+    }
+  }
+
+  /* Скрываем AI Шеф на мобильных устройствах */
+@media (max-width: 768px) {
+    .nav-links a[data-page="aiAssistant"],
+    .mobile-nav a[data-page="aiAssistant"],
+    #aiAssistantPage {
+        display: none !important;
+    }
+}
+
+@media (max-width: 768px) {
+    a[data-page="aiAssistant"],
+    .nav-links a[data-page="aiAssistant"],
+    .mobile-nav a[data-page="aiAssistant"],
+    #aiAssistantPage {
+        display: none !important;
+    }
+    
+    /* Убираем ссылку из футера, если она там есть */
+    .footer a[data-page="aiAssistant"] {
+        display: none !important;
+    }
+}
